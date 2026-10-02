@@ -1,0 +1,26 @@
+{
+  "item_id": "itm_hamburguesa_artesanal",
+  "period": {
+    "from": null,
+    "to": null
+  },
+  "totals": {
+    "events": 5,
+    "view_3d": 2,
+    "ar_open": 1,
+    "add_to_cart": 1,
+    "order_placed": 0,
+    "refund_requested": 0
+  },
+  "unique_sessions": {
+    "viewed_3d": 2,
+    "opened_ar": 1,
+    "added_to_cart": 1
+  },
+  "rates_pct": {
+    "ar_open_rate": 50,
+    "view_to_cart": 50,
+    "ar_to_cart": 100
+  },
+  "avg_view_seconds": 14.2
+}

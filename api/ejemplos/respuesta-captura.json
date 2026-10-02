@@ -1,0 +1,11 @@
+{
+  "job_id": "job_353fc771-db15-4d7b-98fb-f98ec5b9ad47",
+  "restaurant_id": "rst_cali_001",
+  "item_id": "itm_hamburguesa_artesanal",
+  "method": "gaussian_splatting",
+  "source_video_url": "https://ejemplo.co/videos/hamburguesa.mp4",
+  "status": "queued",
+  "progress_pct": 0,
+  "created_at": "2026-10-02T06:16:41.186Z",
+  "simulated": true
+}

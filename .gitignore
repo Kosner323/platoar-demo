@@ -1,0 +1,5 @@
+api/data/events.ndjson
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store

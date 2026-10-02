@@ -1,0 +1,15 @@
+{
+  "name": "platoar-api",
+  "version": "1.0.0",
+  "description": "API de PlatoAR: platos en 3D y tamaño real para apps de domicilios",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

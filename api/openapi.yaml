@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: PlatoAR API
+  version: "1.0.0"
+  description: |
+    API para que una app de domicilios muestre cualquier plato en 3D y en tamaño real
+    (realidad aumentada) y mida si eso aumenta las ventas.
+    Autenticación: cabecera `X-API-Key` en todos los endpoints salvo `/v1/health`.
+servers:
+  - url: http://localhost:3000
+    description: Local
+  - url: https://api.platoar.co
+    description: Producción (ejemplo)
+security:
+  - apiKey: []
+components:
+  securitySchemes:
+    apiKey: { type: apiKey, in: header, name: X-API-Key }
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string, example: item_not_found }
+            message: { type: string }
+    Dimensions:
+      type: object
+      properties:
+        width: { type: number, example: 28 }
+        depth: { type: number, example: 28 }
+        height: { type: number, example: 10.6 }
+    ModelResponse:
+      type: object
+      properties:
+        restaurant_id: { type: string }
+        item_id: { type: string }
+        name: { type: string }
+        status: { type: string, enum: [ready, processing, unavailable] }
+        model:
+          type: object
+          properties:
+            format: { type: string, example: glb }
+            glb_url: { type: string, format: uri }
+            usdz_url: { type: string, nullable: true }
+            dimensions_cm: { $ref: "#/components/schemas/Dimensions" }
+            real_scale: { type: boolean }
+            file_size_bytes: { type: integer }
+            triangles: { type: integer }
+            capture_method: { type: string, enum: [photogrammetry, gaussian_splatting, procedural_sample] }
+            version: { type: integer }
+            updated_at: { type: string, format: date-time }
+        ar:
+          type: object
+          properties:
+            scale: { type: string, example: fixed }
+            placement: { type: string, example: floor }
+            modes: { type: array, items: { type: string } }
+        viewer:
+          type: object
+          properties:
+            web_url: { type: string, format: uri }
+            embed_html: { type: string }
+        size_reference: { type: string }
+        tracking:
+          type: object
+          properties:
+            events_endpoint: { type: string, format: uri }
+            event_types: { type: array, items: { type: string } }
+    Event:
+      type: object
+      required: [type, item_id, session_id]
+      properties:
+        type: { type: string, enum: [view_3d, view_end, ar_tap, ar_open, ar_failed, add_to_cart, order_placed, refund_requested] }
+        item_id: { type: string }
+        session_id: { type: string, description: Identificador anónimo de la sesión del usuario en la app }
+        ts: { type: string, format: date-time }
+        duration_ms: { type: integer, description: Solo para view_end }
+        platform: { type: string, example: android }
+paths:
+  /v1/health:
+    get:
+      summary: Estado del servicio
+      security: []
+      responses:
+        "200": { description: OK }
+  /v1/restaurants/{restaurant_id}/items:
+    get:
+      summary: Platos del restaurante que tienen modelo 3D
+      parameters:
+        - { name: restaurant_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Lista de platos }
+        "404": { description: Restaurante no existe, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  /v1/restaurants/{restaurant_id}/items/{item_id}/model:
+    get:
+      summary: Modelo 3D de un plato (lo llama la app al tocar "Ver en mi mesa")
+      description: Responde con ETag; envía If-None-Match para recibir 304 si el modelo no cambió.
+      parameters:
+        - { name: restaurant_id, in: path, required: true, schema: { type: string }, example: rst_cali_001 }
+        - { name: item_id, in: path, required: true, schema: { type: string }, example: itm_hamburguesa_artesanal }
+      responses:
+        "200":
+          description: Modelo listo
+          content: { application/json: { schema: { $ref: "#/components/schemas/ModelResponse" } } }
+        "304": { description: Sin cambios }
+        "404": { description: Restaurante o plato no existe, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  /v1/events:
+    post:
+      summary: Registra eventos de uso (máximo 100 por petición)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/Event"
+                - type: object
+                  properties:
+                    events: { type: array, maxItems: 100, items: { $ref: "#/components/schemas/Event" } }
+      responses:
+        "202": { description: Eventos aceptados }
+        "400": { description: Evento inválido, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  /v1/analytics/items/{item_id}:
+    get:
+      summary: Conversión de un plato (vistas 3D → AR → carrito)
+      parameters:
+        - { name: item_id, in: path, required: true, schema: { type: string } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        "200": { description: Métricas del plato }
+  /v1/captures:
+    post:
+      summary: Envía el video de un plato para convertirlo en modelo 3D
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [restaurant_id, item_id, source_video_url]
+              properties:
+                restaurant_id: { type: string }
+                item_id: { type: string }
+                source_video_url: { type: string, format: uri }
+                method: { type: string, enum: [photogrammetry, gaussian_splatting] }
+      responses:
+        "202": { description: Trabajo creado (en este MVP el procesamiento es simulado) }
+  /v1/captures/{job_id}:
+    get:
+      summary: Estado del trabajo de captura
+      parameters:
+        - { name: job_id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: queued → reconstructing → optimizing → ready }
+        "404": { description: No existe }
