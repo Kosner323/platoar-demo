@@ -6,19 +6,18 @@
   "model": {
     "format": "glb",
     "glb_url": "https://api.platoar.co/modelos/hamburguesa.glb",
-    "usdz_url": null,
-    "usdz_note": "En iOS el visor genera el USDZ en el dispositivo a partir del GLB.",
+    "usdz_url": "https://api.platoar.co/modelos/hamburguesa.usdz#allowsContentScaling=0",
     "dimensions_cm": {
       "width": 28,
       "depth": 28,
       "height": 10.6
     },
     "real_scale": true,
-    "file_size_bytes": 1525724,
+    "file_size_bytes": 2302384,
     "triangles": 47416,
     "capture_method": "procedural_sample",
-    "version": 1,
-    "updated_at": "2026-10-02T06:00:00Z"
+    "version": 2,
+    "updated_at": "2026-10-02T07:00:00Z"
   },
   "ar": {
     "scale": "fixed",

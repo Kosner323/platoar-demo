@@ -119,8 +119,7 @@ function modelPayload(req, restaurant, item) {
     model: {
       format: "glb",
       glb_url: glbUrl,
-      usdz_url: null,
-      usdz_note: "En iOS el visor genera el USDZ en el dispositivo a partir del GLB.",
+      usdz_url: m.usdz ? `${base}/${m.usdz}#allowsContentScaling=0` : null,
       dimensions_cm: m.dimensions_cm,
       real_scale: true,
       file_size_bytes: m.file_size_bytes,

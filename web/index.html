@@ -88,7 +88,9 @@ model-viewer { width: 100%; height: 100%; --poster-color: transparent; backgroun
   font: inherit; font-weight: 600; border-radius: 12px; padding: 13px 16px; cursor: pointer; border: 1.5px solid transparent;
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-.btn.ar { background: var(--accent); color: var(--accent-ink); }
+.btn.ar { background: var(--accent); color: var(--accent-ink); text-decoration: none; }
+.arlink { display: block; border-radius: 12px; }
+.arlink img { display: block; width: 100%; height: auto; max-width: 100%; }
 .btn.cart { background: transparent; color: var(--ink); border-color: var(--ink); }
 .btn.cart .price { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .btn.ghost { background: transparent; color: var(--muted); border-color: var(--line); font-weight: 500; padding: 9px 12px; }
@@ -150,9 +152,11 @@ footer { font-size: 0.8rem; color: var(--muted); }
       <p class="compare" id="compare"></p>
       <div class="actions">
         <button class="btn ar" id="arBtn" type="button">Ver en mi mesa</button>
+        <a class="arlink" id="arLink" rel="ar" href="#" hidden><img alt="Ver en mi mesa" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MDAiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA2MDAgOTYiPjxyZWN0IHdpZHRoPSI2MDAiIGhlaWdodD0iOTYiIHJ4PSIyNCIgZmlsbD0iIzFmN2E0ZCIvPjx0ZXh0IHg9IjMwMCIgeT0iNTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSItYXBwbGUtc3lzdGVtLCBIZWx2ZXRpY2EsIEFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjMyIiBmb250LXdlaWdodD0iNjAwIiBmaWxsPSIjZmZmZmZmIj5WZXIgZW4gbWkgbWVzYTwvdGV4dD48L3N2Zz4="></a>
         <button class="btn cart" id="cartBtn" type="button">Agregar al pedido · <span class="price" id="price"></span></button>
         <button class="btn ghost" id="dimsBtn" type="button" aria-pressed="true">Ocultar medidas en el modelo</button>
       </div>
+      <p class="note" id="safariNote" hidden>Para ver el plato sobre tu mesa, abre este enlace en Safari. Los navegadores dentro de WhatsApp, Instagram u otras apps no abren la cámara.</p>
       <p class="note" id="arNote" hidden>La cámara no se puede abrir dentro de esta vista previa. Abre la demo desde tu propio enlace (GitHub Pages o Vercel) en el celular y el plato aparecerá sobre tu mesa en tamaño real.</p>
       <p class="toast" id="toast" role="status"></p>
 
@@ -182,15 +186,15 @@ const API = { base: "", key: "" };
 const SESSION_ID = "ses_" + Math.random().toString(36).slice(2, 10);
 
 const DISHES = [
-  { id: "hamburguesa", item_id: "itm_hamburguesa_artesanal", file: "modelos/hamburguesa.glb", name: "Hamburguesa artesanal con papas",
+  { id: "hamburguesa", item_id: "itm_hamburguesa_artesanal", file: "modelos/hamburguesa.glb", usdz: "modelos/hamburguesa.usdz", name: "Hamburguesa artesanal con papas",
     rest: "Parrilla del Peñón (ejemplo)", price: 32900,
     desc: "Carne de res de 150 g, queso cheddar, tomate, lechuga y pan brioche con ajonjolí. Servida en tabla con papas a la francesa.",
     compare: "El pan mide unos 11 cm: un poco más ancho que la palma de una mano adulta." },
-  { id: "empanadas", item_id: "itm_empanadas_x3", file: "modelos/empanadas.glb", name: "Empanadas vallunas x3 con ají",
+  { id: "empanadas", item_id: "itm_empanadas_x3", file: "modelos/empanadas.glb", usdz: "modelos/empanadas.usdz", name: "Empanadas vallunas x3 con ají",
     rest: "Sabor del Pacífico (ejemplo)", price: 12000,
     desc: "Tres empanadas de maíz rellenas de papa y carne, con ají casero de cilantro y limón.",
     compare: "Cada empanada mide unos 10 cm de largo: más o menos el largo de una tarjeta bancaria más un dedo." },
-  { id: "chuleta", item_id: "itm_chuleta_valluna", file: "modelos/chuleta-valluna.glb", name: "Chuleta valluna",
+  { id: "chuleta", item_id: "itm_chuleta_valluna", file: "modelos/chuleta-valluna.glb", usdz: "modelos/chuleta-valluna.usdz", name: "Chuleta valluna",
     rest: "Fonda San Antonio (ejemplo)", price: 38500,
     desc: "Lomo de cerdo apanado de unos 20 cm, arroz blanco, dos patacones y limón. Plato de 30 cm.",
     compare: "La chuleta ocupa casi todo un plato de 30 cm: el ancho de una hoja carta." },
@@ -236,6 +240,20 @@ function closeView() {
   }
 }
 
+// iPhone/iPad: Quick Look nativo de Apple con un archivo .usdz (lo más confiable en iOS)
+const UA = navigator.userAgent;
+const IS_IOS = /iPad|iPhone|iPod/.test(UA) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const IN_APP = IS_IOS && !/Safari\//.test(UA);
+function setupIOS(d) {
+  const link = $("arLink");
+  if (!IS_IOS || !d.usdz) { link.hidden = true; $("arBtn").hidden = false; return; }
+  $("arBtn").hidden = true;
+  link.hidden = false;
+  // allowsContentScaling=0: el plato queda fijo en tamaño real (no se puede agrandar con los dedos)
+  link.href = new URL(d.usdz, location.href).href + "#allowsContentScaling=0";
+  $("safariNote").hidden = !IN_APP;
+}
+
 function select(d) {
   closeView();
   current = d;
@@ -248,6 +266,8 @@ function select(d) {
   $("dw").textContent = $("dd").textContent = $("dh").textContent = "–";
   $("toast").textContent = "";
   $("arNote").hidden = true;
+  setupIOS(d);
+  if (d.usdz) mv.setAttribute("ios-src", d.usdz); else mv.removeAttribute("ios-src");
   mv.alt = "Modelo 3D de " + d.name;
   loadModel(d);
 }
@@ -309,6 +329,7 @@ $("arBtn").addEventListener("click", () => {
     $("arNote").hidden = false;
   }
 });
+$("arLink").addEventListener("click", () => { track("ar_tap"); stats.ar++; render(); });
 $("cartBtn").addEventListener("click", () => {
   stats.carts++;
   track("add_to_cart", { price_cop: current.price });

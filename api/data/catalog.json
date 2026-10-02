@@ -11,12 +11,18 @@
           "price_cop": 32900,
           "model": {
             "glb": "modelos/hamburguesa.glb",
-            "dimensions_cm": { "width": 28.0, "depth": 28.0, "height": 10.6 },
-            "file_size_bytes": 1525724,
+            "dimensions_cm": {
+              "width": 28.0,
+              "depth": 28.0,
+              "height": 10.6
+            },
+            "file_size_bytes": 2302384,
             "triangles": 47416,
             "capture_method": "procedural_sample",
-            "version": 1,
-            "updated_at": "2026-10-02T06:00:00Z"
+            "version": 2,
+            "updated_at": "2026-10-02T07:00:00Z",
+            "usdz": "modelos/hamburguesa.usdz",
+            "usdz_size_bytes": 4340939
           },
           "size_reference": "El pan mide unos 11 cm: un poco más ancho que la palma de una mano adulta."
         }
@@ -33,12 +39,18 @@
           "price_cop": 12000,
           "model": {
             "glb": "modelos/empanadas.glb",
-            "dimensions_cm": { "width": 26.0, "depth": 26.0, "height": 4.7 },
-            "file_size_bytes": 942252,
+            "dimensions_cm": {
+              "width": 26.0,
+              "depth": 26.0,
+              "height": 4.7
+            },
+            "file_size_bytes": 1261584,
             "triangles": 29648,
             "capture_method": "procedural_sample",
-            "version": 1,
-            "updated_at": "2026-10-02T06:00:00Z"
+            "version": 2,
+            "updated_at": "2026-10-02T07:00:00Z",
+            "usdz": "modelos/empanadas.usdz",
+            "usdz_size_bytes": 2488216
           },
           "size_reference": "Cada empanada mide unos 10 cm de largo."
         }
@@ -55,12 +67,18 @@
           "price_cop": 38500,
           "model": {
             "glb": "modelos/chuleta-valluna.glb",
-            "dimensions_cm": { "width": 30.0, "depth": 30.0, "height": 4.2 },
-            "file_size_bytes": 847548,
+            "dimensions_cm": {
+              "width": 30.0,
+              "depth": 30.0,
+              "height": 4.2
+            },
+            "file_size_bytes": 1154096,
             "triangles": 26832,
             "capture_method": "procedural_sample",
-            "version": 1,
-            "updated_at": "2026-10-02T06:00:00Z"
+            "version": 2,
+            "updated_at": "2026-10-02T07:00:00Z",
+            "usdz": "modelos/chuleta-valluna.usdz",
+            "usdz_size_bytes": 2215298
           },
           "size_reference": "La chuleta ocupa casi todo un plato de 30 cm."
         }
